@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Timer App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding-top: 50px;
+            background-color: #f0f0f0;
+        }
+        .timer-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .timer-field {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .timer-field label {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        select {
+            padding: 10px;
+            font-size: 16px;
+            width: 120px;
+        }
+        .buttons {
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 0 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #countdown {
+            font-size: 48px;
+            margin-top: 20px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Set Timer</h1>
+
+    <div class="timer-container">
+        <div class="timer-field">
+            <label for="hours">Hours</label>
+            <select id="hours">
+                <option value="0">0</option>
+                {% for i in range(0, 24) %}
+                    <option value="{{i}}">{{i}}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="timer-field">
+            <label for="minutes">Minutes</label>
+            <select id="minutes">
+                <option value="0">0</option>
+                {% for i in range(0, 60) %}
+                    <option value="{{i}}">{{i}}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="timer-field">
+            <label for="seconds">Seconds</label>
+            <select id="seconds">
+                <option value="0">0</option>
+                {% for i in range(0, 60) %}
+                    <option value="{{i}}">{{i}}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <div class="buttons">
+        <button id="start">Start Timer</button>
+        <button id="reset">Reset Timer</button>
+    </div>
+
+    <div id="countdown">00:00:00</div>
+
+    <audio id="beep" src="{{ url_for('static', filename='beep.mp3') }}" preload="auto"></audio>
+    <!-- If you don't have a beep.mp3, you can use the Web Audio API instead -->
+
+    <script>
+        let timerInterval = null;
+
+        document.getElementById('start').addEventListener('click', function() {
+            // Clear any existing timer
+            clearInterval(timerInterval);
+
+            // Get selected time
+            const hours = parseInt(document.getElementById('hours').value);
+            const minutes = parseInt(document.getElementById('minutes').value);
+            const seconds = parseInt(document.getElementById('seconds').value);
+
+            let totalSeconds = hours * 3600 + minutes * 60 + seconds;
+
+            if (totalSeconds <= 0) {
+                alert("Please set a time greater than 0.");
+                return;
+            }
+
+            updateCountdown(totalSeconds);
+
+            timerInterval = setInterval(function() {
+                totalSeconds--;
+
+                if (totalSeconds <= 0) {
+                    clearInterval(timerInterval);
+                    updateCountdown(0);
+                    playBeep();
+                } else {
+                    updateCountdown(totalSeconds);
+                }
+            }, 1000);
+        });
+
+        document.getElementById('reset').addEventListener('click', function() {
+            clearInterval(timerInterval);
+            document.getElementById('countdown').innerText = "00:00:00";
+        });
+
+        function updateCountdown(seconds) {
+            const hrs = Math.floor(seconds / 3600);
+            const mins = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+
+            document.getElementById('countdown').innerText =
+                String(hrs).padStart(2, '0') + ":" +
+                String(mins).padStart(2, '0') + ":" +
+                String(secs).padStart(2, '0');
+        }
+
+        function playBeep() {
+            // Option 1: Play audio file
+            const beepSound = document.getElementById('beep');
+            beepSound.play();
+
+            
+        }
+    </script>
+
+</body>
+</html>
